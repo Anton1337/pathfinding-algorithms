@@ -27,25 +27,55 @@ const squareColor = sqr => {
 const App = () => {
   const [squares, setSquares] = useState(gridData);
 
-  const search = grid => {
+  const search = async grid => {
     const success = breadtFirst(grid);
     console.log(success);
     if (success) {
       const { explored, goalPath } = success;
-      for (let i = 0; i < explored.length; i++) {
+      // Show explored squares.
+      await Promise.all(
+        Array.from(
+          { length: explored.length },
+          (_, i) =>
+            new Promise(res =>
+              setTimeout(() => {
+                const tempSqr = [...squares];
+                const len = tempSqr[0].length;
+                for (let j = 0; j < len; j++) {
+                  for (let k = 0; k < len; k++) {
+                    if (
+                      tempSqr[j][k].id === explored[i] &&
+                      tempSqr[j][k].type !== 1 &&
+                      tempSqr[j][k].type !== 2
+                    ) {
+                      tempSqr[j][k].type = 4;
+                      setSquares(tempSqr);
+                    }
+                  }
+                }
+                res();
+              }, 30 * (i + 1))
+            )
+        )
+      );
+      // Show nearest path.
+      for (let i = 0; i < goalPath.length; i++) {
         setTimeout(() => {
           const tempSqr = [...squares];
           const len = tempSqr[0].length;
           for (let j = 0; j < len; j++) {
             for (let k = 0; k < len; k++) {
-              if (tempSqr[j][k].id === explored[i]) {
-                console.log(i);
-                tempSqr[j][k].type = 4;
+              if (
+                tempSqr[j][k].id === goalPath[i] &&
+                tempSqr[j][k].type !== 1 &&
+                tempSqr[j][k].type !== 2
+              ) {
+                tempSqr[j][k].type = 5;
                 setSquares(tempSqr);
               }
             }
           }
-        }, 30 * (i + 1));
+        }, 40 * (i + 1));
       }
     }
   };
